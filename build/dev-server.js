@@ -1,4 +1,5 @@
 require('./check-versions')()
+require('shelljs/global')
 
 var config = require('../config')
 if (!process.env.NODE_ENV) {
@@ -48,6 +49,16 @@ Object.keys(proxyTable).forEach(function (context) {
   }
   app.use(proxyMiddleware(options.filter || context, options))
 })
+
+
+
+
+rm('-rf', 'static');
+mkdir('static');
+cp('-R', 'src/assets', 'static');
+
+
+
 
 // handle fallback for HTML5 history API
 app.use(require('connect-history-api-fallback')())
