@@ -1,78 +1,40 @@
-
+import router from '../../router';
 const MainState = function () {};
 MainState.prototype.create = function () {
-	//开启 ARCADE 物理场景
-	this.physics.startSystem(Phaser.Physics.ARCADE);
-
-	this._drawWall();
-	this._drawBall();
-	this._drawBoard();
+	this._drawLogo();
+	this._drawStartBtn();
+	this._drawBackBtn();
+	// this.state.start('PassOneState');
 };
-MainState.prototype._drawWall = function () {
-	this.wall = this.add.group();
-	this.wall.enableBody = true;
-
-	for(let i = 1; i < 8; i++){
-		for(let j = 1; j < 8; j++){
-			let brick = this.wall.create(40 * i, 20 * j, 'brick1');
-			brick.body.immovable = true;
-			brick.scale.setTo(0.7);
-			brick.anchor.setTo(0.5);
-		}
-	}
+MainState.prototype._drawLogo = function () {
+	this.logo = this.add.image(this.world.centerX, this.world.centerY / 3 * 2, 'logo');
+	this.logo.anchor = {x: 0.5, y: 0.5};
+	this.logo.scale.setTo(2);
 };
-MainState.prototype._drawBall = function () {
-	this.ball = this.add.graphics(this.world.centerX - 10, this.world.height - 70);
-	this.ball.beginFill(0xFFFFFF, 0);
-	this.ball.drawCircle(10, 10, 20);
-	this.ball.endFill();
+MainState.prototype._drawStartBtn = function(){
+	this.btnbg1 = this.add.image(this.world.centerX, this.world.centerY / 3 * 4, 'btnbg1');
+	this.btnbg1.anchor = {x: 0.5, y: 0.5};
+	this.btnbg1.scale.setTo(0.8, 0.6);
+	this.btntxt1 = this.add.text(this.world.centerX, this.world.centerY / 3 * 4 + 3, '开始游戏', {fill: '#fff', fontSize: '16px'});
+	this.btntxt1.anchor = {x: 0.5, y: 0.5};
 
-	this.ballbg = this.add.sprite(this.ball.position.x, this.ball.position.y, 'ball');
-	this.ballbg.anchor.setTo(0.5);
-	this.ballbg.scale.setTo(0.25);
+	this.btnbg1.inputEnabled = true;//开启输入事件
 
-	this.physics.enable(this.ball, Phaser.Physics.ARCADE);
-
-	this.ball.body.collideWorldBounds = true;
-	this.ball.body.bounce.set(1);
-	this.ball.body.velocity.x = 150;
-	this.ball.body.velocity.y = -150;
-
+	this.btnbg1.events.onInputDown.add(() => {
+		this.state.start('PassOneState');
+	})
 };
-MainState.prototype._drawBoard = function () {
-	this.board = this.add.sprite(this.world.centerX, this.world.height - 40, 'board');
-	this.board.anchor = {x: 0.5, y: 0.5};
-	this.board.scale.setTo(1, 0.8);
+MainState.prototype._drawBackBtn = function(){
+	this.btnbg2 = this.add.image(this.world.centerX, this.world.centerY / 2 * 3 + 20, 'btnbg1');
+	this.btnbg2.anchor = {x: 0.5, y: 0.5};
+	this.btnbg2.scale.setTo(0.8, 0.6);
+	this.btntxt2 = this.add.text(this.world.centerX, this.world.centerY / 2 * 3 + 23, '返回', {fill: '#fff', fontSize: '16px'});
+	this.btntxt2.anchor = {x: 0.5, y: 0.5};
 
-	this.physics.enable(this.board, Phaser.Physics.ARCADE);
-	this.board.body.collideWorldBounds = true;
-	this.board.body.immovable = true;
-
-	this.board.inputEnabled = true;
-	this.board.input.enableDrag();
-	let _this = this;
-	this.board.events.onDragUpdate.add(function (e) {
-		_this.board.position.y = _this.world.height - 40;
-	});
-};
-MainState.prototype.update = function () {
-	let i = 0;
-	this.physics.arcade.collide(this.ball, this.wall, function (a, b) {
-		b.kill();
-	});
-	this.physics.arcade.collide(this.ball, this.board, function (a, b) {
-		a.body.velocity.x *= 1.01;
-		i++;
-		if(!(i % 2)){
-			a.body.velocity.x *= 1.1;
-			a.body.velocity.y *= 1.1;
-		}
-	});
-	if(this.ball.position.y > this.world.height - 30){
-		this.ball.kill();
-	}
-	this.ballbg.position.x = this.ball.position.x + 10;
-	this.ballbg.position.y = this.ball.position.y + 10;
+	this.btnbg2.inputEnabled = true;//开启输入事件
+	this.btnbg2.events.onInputDown.add(function () {
+		router.go(-1);
+	})
 };
 
 export default MainState;
