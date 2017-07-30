@@ -28,19 +28,22 @@ PassOneState.prototype._start = function () {
 	this.startText = this.add.text(this.world.centerX, this.world.centerY, '3', {fill: '#ccc', fontSize: '32px'});
 	this.startText.anchor = {x: 0.5, y: 0.5};
 	this.startTextNum = 3;
+	let _this = this;
 	function timers() {
 		setTimeout(() => {
-			if(this.startTextNum > 1){
-				this.startTextNum--;
-				this.startText.text = this.startTextNum;
+			if(_this.startTextNum > 1){
+				_this.startTextNum--;
+				_this.startText.text = _this.startTextNum;
 				return timers();
 			}else {
-				this.startText.text = '开始!';
+				_this.startText.text = '开始!';
 				setTimeout(function () {
-					this.startText.kill();
-					this._board();
-					this._ball();
-					this._generateBuff();
+					_this.startText.kill();
+					_this._board();
+					_this._ball();
+					_this.buffGroup = _this.add.group();
+
+					_this.buffGroup.enableBody = true;
 				}, 500);
 			}
 		}, 700);
@@ -80,6 +83,8 @@ PassOneState.prototype.update = function () {
 			b.kill();
 			if (this.score === 49) {//判断是否过关
 				this._pass();
+			}else{
+				this._generateBuff(b);
 			}
 		});
 	}
@@ -126,6 +131,14 @@ PassOneState.prototype.update = function () {
 		this.fireball.position.x = this.ball.position.x + 10;
 		this.fireball.position.y = this.ball.position.y + 10;
 	}
+
+	//获取buff
+	this.physics.arcade.overlap(this.board, this.buffGroup, (a, b) => {
+		console.log(b.key, b.position.x, b.position.y);
+		console.log(a.key, a.position.x, a.position.y);
+		console.log('getBuff', b.key);
+		b.kill();
+	});
 };
 
 //初始 绘制砖块
@@ -138,9 +151,10 @@ PassOneState.prototype._drawWall = function () {
 	this.wall_screen_between = (document.body.offsetWidth - this.brick_between * this.brick_col_num) / 2;
 	for(let i = 0; i < this.brick_col_num; i++){
 		for(let j = 0; j < this.brick_row_num; j++){
-			let brick = this.wall.create(this.wall_screen_between + this.brick_between * i, 100 + 20 * j, 'brick1');
+			let brick = this.wall.create(this.wall_screen_between + 20 + this.brick_between * i, 100 + 20 * j, 'brick1');
 			brick.body.immovable = true;
 			brick.scale.setTo(0.7);
+			brick.anchor.setTo(0.5);
 		}
 	}
 };
@@ -160,7 +174,7 @@ PassOneState.prototype._drawBall = function () {
 
 	this.ball.body.collideWorldBounds = true;
 
-	this.buff('fire');
+	// this.buff('fire');
 };
 
 //球的物理属性  运动的设置
@@ -313,25 +327,53 @@ PassOneState.prototype._getBuff = function () {
 PassOneState.prototype._generateBuff = function (brick) {
 	//打碎砖块后，有一定比例 随机出现
 	let rand = Math.random() * 100;
-	if(rand / 10 >= 2 && rand / 10 < 4){//20%
+	// if(rand / 10 >= 2 && rand / 10 < 4){//20%
+	if(true){
 		if(parseInt(rand) % 10 === 0){//10%  => 2%
+			console.log('generateBuff', 'buff_fire');
 			//fire
-
+			this.buff_fire = this.buffGroup.create(brick.position.x, brick.position.y, 'buff_fire');
+			this.buff_fire.body.gravity.y = 170;
+			this.buff_fire.body.gravity.x = 0;
+			this.buff_fire.scale.setTo(0.15);
+			this.buff_fire.anchor.setTo(0.5);
 		}else if(parseInt(rand) % 8 === 0){//12.5% => 2.5%
+			console.log('generateBuff', 'buff_lang');
 			//lang
-
-		}else if(parseInt(rand) % 8 === 0){
+			this.buff_lang = this.buffGroup.create(brick.position.x, brick.position.y, 'buff_lang');
+			this.buff_lang.body.gravity.y = 170;
+			this.buff_lang.body.gravity.x = 0;
+			this.buff_lang.scale.setTo(0.13);
+			this.buff_lang.anchor.setTo(0.5);
+		}else if(parseInt(rand) % 8 === 1){
+			console.log('generateBuff', 'buff_short');
 			//short
-
-		}else if(parseInt(rand) % 8 === 0){
+			this.buff_short = this.buffGroup.create(brick.position.x, brick.position.y, 'buff_short');
+			this.buff_short.body.gravity.y = 170;
+			this.buff_short.body.gravity.x = 0;
+			this.buff_short.scale.setTo(0.15);
+			this.buff_short.anchor.setTo(0.5);
+		}else if(parseInt(rand) % 8 === 2){
 			//double
 
-		}else if(parseInt(rand) % 8 === 0){
-			//slow
-
-		}else if(parseInt(rand) % 8 === 0){
+		}else if(parseInt(rand) % 8 === 3){
+			console.log('generateBuff', 'buff_slow');
+		// 	slow
+			this.buff_slow = this.buffGroup.create(brick.position.x, brick.position.y, 'buff_slow');
+			this.buff_slow.body.gravity.y = 170;
+			this.buff_slow.body.gravity.x = 0;
+			this.buff_slow.scale.setTo(0.3);
+			this.buff_slow.anchor.setTo(0.5);
+		}else if(parseInt(rand) % 8 === 4){
+				// }else if(parseInt(rand) % 8){
 			//fast
-
+			console.log('generateBuff', 'buff_fast');
+			this.buff_fast = this.buffGroup.create(brick.position.x, brick.position.y, 'buff_fast');
+			this.buff_fast.body.gravity.y = 170;
+			this.buff_fast.body.gravity.x = 0;
+			this.buff_fast.scale.setTo(0.07);
+			this.buff_fast.body.angularVelocity = 720;
+			this.buff_fast.anchor.setTo(0.5);
 		}
 	}
 };
